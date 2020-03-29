@@ -59,7 +59,6 @@ func Start() {
 
 	log.Println("Todays praytime: ", pMock)
 
-	resetTime := "00:00:01"
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
 	p = pMock
