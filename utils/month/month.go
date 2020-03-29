@@ -1,17 +1,18 @@
 package month
 
 var (
+	// January Month name
 	January = Month{
 		Short: "Jan",
-		Long: "January",
+		Long:  "January",
 	}
 
+	// March Month name
 	March = Month{
 		Short: "Mar",
-		Long: "March"
+		Long:  "March",
 	}
 )
-
 
 // Month represent month name
 type Month struct {

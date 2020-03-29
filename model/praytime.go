@@ -1,12 +1,9 @@
 package model
 
-import (
-	"time"
-)
-
 // Praytime implement
 type Praytime struct {
-	Time     *time.Time
+	Month    string
+	Day      string
 	Date     string
 	Fajr     string
 	Sunshine string

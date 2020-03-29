@@ -1,31 +1,26 @@
 package praytime
 
 import (
-	"fmt"
 	"log"
 	"regexp"
 	"strconv"
-
-	"github.com/Robihamanto/csie-bot/model"
 )
 
 // GetDate change string to date
 // return date, month, err
-func GetDate(t *model.Praytime) (int, string, error) {
-	lt := len(t.Date)
-	month := t.Date[lt-3 : lt]
-	date := t.Date[lt-6 : lt-4]
-	date = getNumberOnly(date)
+func GetDate(t string) (string, string) {
+	lt := len(t)
+	month := t[lt-3 : lt]
+	day := t[lt-6 : lt-4]
+	day = getNumberOnly(day)
 
-	log.Println("Month:", month)
-	log.Println("Date:", date)
-
-	dateint, err := strconv.Atoi(date)
-	if err == nil {
-		fmt.Println(dateint)
+	// conv to int if pos
+	_, err := strconv.Atoi(day)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return dateint, month, nil
+	return day, month
 }
 
 func getNumberOnly(s string) string {
