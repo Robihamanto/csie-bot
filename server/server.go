@@ -35,16 +35,15 @@ func Start() {
 	var hs string
 	var ms string
 	var ss string
-	mth := 15
-	mtm := 46
-	mts := 00
+	mth := 16
+	mtm := 30
 
-	fajrm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts)
-	sunrm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts+30)
-	dhuhrm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts)
-	asrrm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts)
-	maghrm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts)
-	isharm := fmt.Sprintf("%d:%d:%d", mth, mtm, mts)
+	fajrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	sunrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:%d:10", mth, mtm)
+	asrrm := fmt.Sprintf("%d:%d:20", mth, mtm)
+	maghrm := fmt.Sprintf("%d:%d:30", mth, mtm)
+	isharm := fmt.Sprintf("%d:%d:40", mth, mtm)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -58,13 +57,14 @@ func Start() {
 		Ishaa:    isharm,
 	}
 
+	log.Println("Todays praytime: ", pMock)
+
 	resetTime := "00:00:01"
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
 	p = pMock
 
 	for {
-		time.Sleep(1 * time.Second)
 		// 2. Check is time hour == 00:01 - 01:00
 		// Update today's pray time
 		// Reset sent pray time and iqomah status
@@ -165,6 +165,8 @@ func Start() {
 			// Send iqomah reminder
 			log.Println("Iqomah")
 		}
+
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -259,7 +261,7 @@ func syncClock() (int, int, int) {
 	// 14:06:05 world
 	// 14:05:50 local
 
-	gap := ((ha * 3600) - (h * 3600)) + ((ma * 60) - (m * 60)) + (sa - s)
+	gap := ((ha * 3600) - (h * 3600)) + ((ma * 60) - (m * 60)) + (sa - s) - 1
 
 	h = gap / 3600
 	m = (gap % 3600) / 60
@@ -270,7 +272,7 @@ func syncClock() (int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + 10 // CHANGE TO I
+	t = t + 3 // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
