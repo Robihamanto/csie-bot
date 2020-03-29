@@ -1,4 +1,4 @@
-package service
+package praytime
 
 import (
 	"fmt"

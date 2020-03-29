@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/Robihamanto/csie-bot/service"
 	"github.com/Robihamanto/csie-bot/utils/config"
 	"github.com/Robihamanto/csie-bot/utils/loader"
 	"github.com/beevik/ntp"
@@ -21,23 +20,25 @@ func main() {
 		fmt.Println(err)
 	}
 
-	log.Println("Year:", ntpTime.Year)
-	log.Println("Month:", ntpTime.Month)
-	log.Println("Day:", ntpTime.Year)
-	log.Println("Hour:", ntpTime.Year)
-	log.Println("Minute:", ntpTime.Minute)
-	log.Println("Second:", ntpTime.Second)
+	year, month, day := ntpTime.Date()
+	log.Println("Year: ", year)
+	log.Println("Month: ", month)
+	log.Println("Day: ", day)
 
-	ntpTimeFormatted := ntpTime.Format(time.UnixDate)
-
-	fmt.Printf("Network time: %v\n", ntpTime)
-	fmt.Printf("Unix Date Network time: %v\n", ntpTimeFormatted)
+	// log.Println("Year:", ntpTime.Year)
+	// log.Println("Month:", ntpTime.Month)
+	// log.Println("Day:", ntpTime.Day)
+	// log.Println("Hour:", ntpTime.Hour)
+	// log.Println("Minute:", ntpTime.Minute)
+	// log.Println("Second:", ntpTime.Second)
 
 	praytimes, err := loader.Read("praytime.march.csv")
 
-	log.Println("Praytimes :", praytimes[30])
-	d, m, err := service.GetDate(&praytimes[30])
+	log.Println("Praytimes Obj :", praytimes[30])
+	mo := praytimes[30].Month
+	log.Println("Obj Month:", mo)
 
+	d, m, err := service.GetDate(&praytimes[30])
 	log.Println("Praytimes :", d)
 	log.Println("Praytimes :", m)
 

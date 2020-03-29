@@ -3,12 +3,12 @@ package month
 var (
 	January = Month{
 		Short: "Jan",
-		Long:, "January"
+		Long: "January",
 	}
 
 	March = Month{
 		Short: "Mar",
-		Long:, "March"
+		Long: "March"
 	}
 )
 
