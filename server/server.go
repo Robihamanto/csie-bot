@@ -35,15 +35,15 @@ func Start() {
 	var hs string
 	var ms string
 	var ss string
-	mth := 16
-	mtm := 30
+	mth := 19
+	mtm := 4
 
-	fajrm := fmt.Sprintf("%d:%d:00", mth, mtm)
-	sunrm := fmt.Sprintf("%d:%d:00", mth, mtm)
-	dhuhrm := fmt.Sprintf("%d:%d:10", mth, mtm)
-	asrrm := fmt.Sprintf("%d:%d:20", mth, mtm)
-	maghrm := fmt.Sprintf("%d:%d:30", mth, mtm)
-	isharm := fmt.Sprintf("%d:%d:40", mth, mtm)
+	fajrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
+	sunrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:0%d:10", mth, mtm)
+	asrrm := fmt.Sprintf("%d:0%d:20", mth, mtm)
+	maghrm := fmt.Sprintf("%d:0%d:30", mth, mtm)
+	isharm := fmt.Sprintf("%d:0%d:40", mth, mtm)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -104,9 +104,10 @@ func Start() {
 		}
 
 		now = fmt.Sprintf("%s:%s:%s", hs, ms, ss)
-		log.Println(now)
+		// log.Println(now)
 
-		if now == resetTime {
+		if h == 1 {
+			time.Sleep(10 * time.Minute)
 			body = fetchMuslimProTime()
 			p = createPrayTime(body)
 			log.Println("Praytime ", p)
@@ -122,48 +123,47 @@ func Start() {
 		// Check fajr time from Praytime
 		if now == p.Fajr && !iqomah {
 			// Send adzan reminder
-			log.Println("Fajr Adzan")
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 30)
-			log.Println("Iqomah :", iqomahTime)
+			sendAdzanReminder("Fajr", p.Fajr, 30)
 		}
 
 		// Check dhuhr time from Praytime
 		if now == p.Dhuhr && !iqomah {
 			// Send adzan reminder
-			log.Println("Dhuhr Adzan")
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
+			sendAdzanReminder("Dhuhr", p.Dhuhr, 20)
 		}
 
 		// Check asr time from Asr
 		if now == p.Asr && !iqomah {
 			// Send adzan reminder
-			log.Println("Asr Adzan")
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
+			sendAdzanReminder("Asr", p.Asr, 20)
 		}
 
 		// Check magrib time from Praytime
 		if now == p.Maghrib && !iqomah {
 			// Send adzan reminder
-			log.Println("Maghrib Adzan")
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
+			sendAdzanReminder("Maghrib", p.Maghrib, 30)
 		}
 
 		// Check ishaa time from Praytime
 		if now == p.Ishaa && !iqomah {
 			// Send adzan reminder
-			log.Println("Ishaa Adzan")
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
+			sendAdzanReminder("Isha'a", p.Fajr, 30)
 		}
 
 		if iqomah && iqomahTime == now {
 			iqomah = false
 			// Send iqomah reminder
-			log.Println("Iqomah")
+			sendIqomahReminder()
 		}
 
 		time.Sleep(1 * time.Second)
@@ -301,4 +301,23 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 
 	time = fmt.Sprintf("%s:%s:%s", hs, ms, ss)
 	return time
+}
+
+func sendAdzanReminder(p, t string, i int) {
+
+	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will perform %d minute later..", p, t, i)
+	log.Println(text)
+	// robotgo.MoveMouse(1444, 596)
+	// robotgo.Click("left", true)
+	// robotgo.TypeStr(text)
+	// robotgo.KeyTap("enter")
+}
+
+func sendIqomahReminder() {
+	text := fmt.Sprintf("Iqomah 🎉")
+	log.Println(text)
+	// robotgo.MoveMouse(1444, 596)
+	// robotgo.Click("left", true)
+	// robotgo.TypeStr(text)
+	// robotgo.KeyTap("enter")
 }

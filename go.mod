@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/beevik/ntp v0.3.0
-	github.com/go-vgo/robotgo v0.0.0-20200324160128-8bfef356cc5a // indirect
+	github.com/go-vgo/robotgo v0.0.0-20200324160128-8bfef356cc5a
 	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	google.golang.org/grpc v1.28.0 // indirect
