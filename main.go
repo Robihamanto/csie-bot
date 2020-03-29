@@ -44,8 +44,16 @@ func main() {
 	m := t.Minute()
 	s := t.Second()
 
-	// adjust system time with gap time
-	h = 
+	// adjust system time with gap time (-) means tertinggal (+ means lead)
+	if hGap < 0 || mGap < 0 || sGap < 0 {
+		h = h - hGap
+		m = m - mGap
+		s = s - sGap
+	} else {
+		h = h + hGap
+		m = m + mGap
+		s = s + sGap
+	}
 
 	var now string
 	if h < 10 {
@@ -189,13 +197,13 @@ func syncClock() (int, int, int) {
 	// Case 1
 	// 14:05:30 world
 	// 14:05:15 local
-	
+
 	// Case 2
 	// 14:06:05 world
 	// 14:05:50 local
 
 	gap := ((ha * 3600) - (h * 3600)) + ((ma * 60) - (m * 60)) + (sa - s)
-	
+
 	h = gap / 3600
 	m = gap / 60
 	s = gap % 60
