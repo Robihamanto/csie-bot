@@ -11,6 +11,7 @@ import (
 	"github.com/Robihamanto/csie-bot/model"
 	"github.com/Robihamanto/csie-bot/service/praytime"
 	"github.com/beevik/ntp"
+	"github.com/go-vgo/robotgo"
 )
 
 // Start serving time for pray reminder
@@ -36,14 +37,14 @@ func Start() {
 	var hs string
 	var ms string
 	mth := 10
-	mtm := 1
+	mtm := 12
 
-	fajrm := fmt.Sprintf("%d:0%d", mth, mtm)
-	sunrm := fmt.Sprintf("%d:0%d", mth, mtm)
-	dhuhrm := fmt.Sprintf("%d:0%d", mth, mtm+1)
-	asrrm := fmt.Sprintf("%d:0%d", mth, mtm+2)
-	maghrm := fmt.Sprintf("%d:0%d", mth, mtm+3)
-	isharm := fmt.Sprintf("%d:0%d", mth, mtm+4)
+	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
+	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:%d", mth, mtm+1)
+	asrrm := fmt.Sprintf("%d:%d", mth, mtm+2)
+	maghrm := fmt.Sprintf("%d:%d", mth, mtm+3)
+	isharm := fmt.Sprintf("%d:%d", mth, mtm+4)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -61,9 +62,9 @@ func Start() {
 
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
-	p = pMock
+	// p = pMock
 
-	today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+	today := fmt.Sprintf("🕌 Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
 	sendGeneralNotification(today)
 
 	for {
@@ -110,13 +111,8 @@ func Start() {
 			p = createPrayTime(body)
 			state = 1
 
-			log.Println("Praytime ", p)
-			log.Println("Now:\t", now)
-			log.Println("Fajr:\t", p.Fajr)
-			log.Println("Dhuhr:\t", p.Dhuhr)
-			log.Println("Asr:\t", p.Asr)
-			log.Println("Maghrib:\t", p.Maghrib)
-			log.Println("Ishaa:\t", p.Ishaa)
+			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+			sendGeneralNotification(today)
 		}
 
 		// Check fajr time from Praytime
@@ -189,7 +185,7 @@ func Start() {
 }
 
 func fetchMuslimProTime() string {
-	resp, err := http.Get("http://www.muslimpro.com/muslimprowidget.js?cityid=6696918&timeformat=24&convention=EgyptBis")
+	resp, err := http.Get("http://www.muslimpro.com/muslimprowidget.js?cityid=1668355&timeformat=24&convention=EgyptBis")
 	checkErr(err)
 	defer resp.Body.Close()
 
@@ -308,25 +304,25 @@ func sendAdzanReminder(p, t string, i int) {
 
 	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes..", p, t, i)
 	log.Println(text)
-	// robotgo.MoveMouse(1444, 596)
-	// robotgo.Click("left", true)
-	// robotgo.PasteStr(text)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1477, 513)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(text)
+	robotgo.KeyTap("enter")
 }
 
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
 	log.Println(text)
-	// robotgo.MoveMouse(1444, 596)
-	// robotgo.Click("left", true)
-	// robotgo.PasteStr(text)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1477, 513)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(text)
+	robotgo.KeyTap("enter")
 }
 
 func sendGeneralNotification(t string) {
 	log.Println(t)
-	// robotgo.MoveMouse(1444, 596)
-	// robotgo.Click("left", true)
-	// robotgo.PasteStr(t)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1477, 513)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(t)
+	robotgo.KeyTap("enter")
 }
