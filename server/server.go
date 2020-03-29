@@ -16,10 +16,11 @@ import (
 // Start serving time for pray reminder
 func Start() {
 	// Do clock sync with website
-	hGap, mGap, sGap := syncClock()
+	_, _, _, gap := syncClock()
 	// log.Println("Hour gap: ", hGap)
 	// log.Println("Minute gap: ", mGap)
 	// log.Println("Second gap: ", sGap)
+	log.Println("Gap: ", gap)
 
 	// State desc
 	// 1 : Fajr adzan
@@ -36,14 +37,14 @@ func Start() {
 	var ms string
 	var ss string
 	mth := 19
-	mtm := 4
+	mtm := 27
 
-	fajrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
-	sunrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
-	dhuhrm := fmt.Sprintf("%d:0%d:10", mth, mtm)
-	asrrm := fmt.Sprintf("%d:0%d:20", mth, mtm)
-	maghrm := fmt.Sprintf("%d:0%d:30", mth, mtm)
-	isharm := fmt.Sprintf("%d:0%d:40", mth, mtm)
+	fajrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	sunrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:%d:10", mth, mtm)
+	asrrm := fmt.Sprintf("%d:%d:20", mth, mtm)
+	maghrm := fmt.Sprintf("%d:%d:30", mth, mtm)
+	isharm := fmt.Sprintf("%d:%d:40", mth, mtm)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -73,16 +74,18 @@ func Start() {
 		m := t.Minute()
 		s := t.Second()
 
-		// adjust system time with gap time (-) means tertinggal (+ means lead)
-		if hGap < 0 || mGap < 0 || sGap < 0 {
-			h = h - hGap
-			m = m - mGap
-			s = s - sGap
+		ts := (h * 3600) + (m * 60) + s
+
+		// adjust system time with gap time, if result (-) means tertinggal (+ means lead)
+		if gap < 0 {
+			ts = ts - gap
 		} else {
-			h = h + hGap
-			m = m + mGap
-			s = s + sGap
+			ts = ts + gap
 		}
+
+		h = ts / 3600
+		m = (ts % 3600) / 60
+		s = ts % 60
 
 		if h < 10 {
 			hs = fmt.Sprintf("0%d", h)
@@ -103,7 +106,7 @@ func Start() {
 		}
 
 		now = fmt.Sprintf("%s:%s:%s", hs, ms, ss)
-		// log.Println(now)
+		log.Println(now)
 
 		if h == 1 {
 			time.Sleep(10 * time.Minute)
@@ -125,6 +128,7 @@ func Start() {
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 30)
 			sendAdzanReminder("Fajr", p.Fajr, 30)
+			log.Println("Fajr Adzan")
 		}
 
 		// Check dhuhr time from Praytime
@@ -133,6 +137,7 @@ func Start() {
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
 			sendAdzanReminder("Dhuhr", p.Dhuhr, 20)
+			log.Println("Dhuhr Adzan")
 		}
 
 		// Check asr time from Asr
@@ -141,6 +146,7 @@ func Start() {
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
 			sendAdzanReminder("Asr", p.Asr, 20)
+			log.Println("Asr Adzan")
 		}
 
 		// Check magrib time from Praytime
@@ -149,6 +155,7 @@ func Start() {
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
 			sendAdzanReminder("Maghrib", p.Maghrib, 30)
+			log.Println("Maghrib Adzan")
 		}
 
 		// Check ishaa time from Praytime
@@ -157,6 +164,7 @@ func Start() {
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
 			sendAdzanReminder("Isha'a", p.Fajr, 30)
+			log.Println("Isha'a Adzan")
 		}
 
 		if iqomah && iqomahTime == now {
@@ -226,7 +234,7 @@ func checkErr(err error) {
 	}
 }
 
-func syncClock() (int, int, int) {
+func syncClock() (int, int, int, int) {
 
 	ntpTime, err := ntp.Time("time.apple.com")
 	if err != nil {
@@ -266,7 +274,7 @@ func syncClock() (int, int, int) {
 	m = (gap % 3600) / 60
 	s = gap % 60
 
-	return h, m, s
+	return h, m, s, gap
 }
 
 func iqomahTimeBuilder(h, m, s, i int) string {
@@ -304,7 +312,7 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 
 func sendAdzanReminder(p, t string, i int) {
 
-	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will perform %d minute later..", p, t, i)
+	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will held in %d minutes..", p, t, i)
 	log.Println(text)
 	// robotgo.MoveMouse(1444, 596)
 	// robotgo.Click("left", true)
