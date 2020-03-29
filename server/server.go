@@ -11,6 +11,7 @@ import (
 	"github.com/Robihamanto/csie-bot/model"
 	"github.com/Robihamanto/csie-bot/service/praytime"
 	"github.com/beevik/ntp"
+	"github.com/go-vgo/robotgo"
 )
 
 // Start serving time for pray reminder
@@ -36,15 +37,15 @@ func Start() {
 	var hs string
 	var ms string
 	var ss string
-	mth := 19
-	mtm := 27
+	mth := 20
+	mtm := 9
 
-	fajrm := fmt.Sprintf("%d:%d:00", mth, mtm)
-	sunrm := fmt.Sprintf("%d:%d:00", mth, mtm)
-	dhuhrm := fmt.Sprintf("%d:%d:10", mth, mtm)
-	asrrm := fmt.Sprintf("%d:%d:20", mth, mtm)
-	maghrm := fmt.Sprintf("%d:%d:30", mth, mtm)
-	isharm := fmt.Sprintf("%d:%d:40", mth, mtm)
+	fajrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
+	sunrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:0%d:10", mth, mtm)
+	asrrm := fmt.Sprintf("%d:0%d:20", mth, mtm)
+	maghrm := fmt.Sprintf("%d:0%d:30", mth, mtm)
+	isharm := fmt.Sprintf("%d:0%d:40", mth, mtm)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -62,7 +63,10 @@ func Start() {
 
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
-	p = pMock
+	// p = pMock
+
+	today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+	sendGeneralNotification(today)
 
 	for {
 		// 2. Check is time hour == 00:01 - 01:00
@@ -154,7 +158,7 @@ func Start() {
 			// Send adzan reminder
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Maghrib", p.Maghrib, 30)
+			sendAdzanReminder("Maghrib", p.Maghrib, 10)
 			log.Println("Maghrib Adzan")
 		}
 
@@ -163,7 +167,7 @@ func Start() {
 			// Send adzan reminder
 			iqomah = true
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Isha'a", p.Fajr, 30)
+			sendAdzanReminder("Isha'a", p.Ishaa, 10)
 			log.Println("Isha'a Adzan")
 		}
 
@@ -279,7 +283,7 @@ func syncClock() (int, int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + 3 // CHANGE TO I
+	t = t + i // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
@@ -314,17 +318,25 @@ func sendAdzanReminder(p, t string, i int) {
 
 	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will held in %d minutes..", p, t, i)
 	log.Println(text)
-	// robotgo.MoveMouse(1444, 596)
-	// robotgo.Click("left", true)
-	// robotgo.TypeStr(text)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1444, 596)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(text)
+	robotgo.KeyTap("enter")
 }
 
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
 	log.Println(text)
-	// robotgo.MoveMouse(1444, 596)
-	// robotgo.Click("left", true)
-	// robotgo.TypeStr(text)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1444, 596)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(text)
+	robotgo.KeyTap("enter")
+}
+
+func sendGeneralNotification(t string) {
+	log.Println(t)
+	robotgo.MoveMouse(1444, 596)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(t)
+	robotgo.KeyTap("enter")
 }
