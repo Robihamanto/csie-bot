@@ -38,14 +38,14 @@ func Start() {
 	var ms string
 	var ss string
 	mth := 20
-	mtm := 9
+	mtm := 17
 
-	fajrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
-	sunrm := fmt.Sprintf("%d:0%d:00", mth, mtm)
-	dhuhrm := fmt.Sprintf("%d:0%d:10", mth, mtm)
-	asrrm := fmt.Sprintf("%d:0%d:20", mth, mtm)
-	maghrm := fmt.Sprintf("%d:0%d:30", mth, mtm)
-	isharm := fmt.Sprintf("%d:0%d:40", mth, mtm)
+	fajrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	sunrm := fmt.Sprintf("%d:%d:00", mth, mtm)
+	dhuhrm := fmt.Sprintf("%d:%d:10", mth, mtm)
+	asrrm := fmt.Sprintf("%d:%d:20", mth, mtm)
+	maghrm := fmt.Sprintf("%d:%d:30", mth, mtm)
+	isharm := fmt.Sprintf("%d:%d:40", mth, mtm)
 
 	pMock := model.Praytime{
 		Month:    "March",
@@ -283,7 +283,7 @@ func syncClock() (int, int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + i // CHANGE TO I
+	t = t + (i * 60) // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
@@ -316,7 +316,7 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 
 func sendAdzanReminder(p, t string, i int) {
 
-	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will held in %d minutes..", p, t, i)
+	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes..", p, t, i)
 	log.Println(text)
 	robotgo.MoveMouse(1444, 596)
 	robotgo.Click("left", true)
