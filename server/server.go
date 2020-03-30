@@ -15,7 +15,9 @@ import (
 )
 
 // Start serving time for pray reminder
-func Start() {
+func Start(s int) {
+	// Find mouse position for send message field
+	// x, y := robotgo.GetMousePos()
 	// Do clock sync with website
 	_, _, _, gap := syncClock()
 	// log.Println("Hour gap: ", hGap)
@@ -30,14 +32,14 @@ func Start() {
 	// 7 : Maghrib adzan	8 : Maghrib iqomah
 	// 9 : Isha'a adzan		10 : Isha'a iqomah
 
-	state := 1
+	state := s
 	var iqomahTime string
 
 	var now string
 	var hs string
 	var ms string
-	mth := 10
-	mtm := 12
+	mth := 13
+	mtm := 56
 
 	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
 	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
@@ -126,24 +128,24 @@ func Start() {
 		// Check dhuhr time from Praytime
 		if now == p.Dhuhr && state == 3 {
 			state = state + 1
-			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
-			sendAdzanReminder("Dhuhr", p.Dhuhr, 20)
+			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
+			sendAdzanReminder("Dhuhr", p.Dhuhr, 15)
 			log.Println("Dhuhr Adzan")
 		}
 
 		// Check asr time from Asr
 		if now == p.Asr && state == 5 {
 			state = state + 1
-			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
-			sendAdzanReminder("Asr", p.Asr, 20)
+			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
+			sendAdzanReminder("Asr", p.Asr, 15)
 			log.Println("Asr Adzan")
 		}
 
 		// Check magrib time from Praytime
 		if now == p.Maghrib && state == 7 {
 			state = state + 1
-			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Maghrib", p.Maghrib, 15)
+			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
+			sendAdzanReminder("Maghrib", p.Maghrib, 20)
 			log.Println("Maghrib Adzan")
 		}
 
@@ -275,7 +277,7 @@ func syncClock() (int, int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + i // (i * 60) // CHANGE TO I
+	t = t + (i * 60) // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
@@ -297,6 +299,7 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 	}
 
 	time = fmt.Sprintf("%s:%s", hs, ms)
+	// log.Println("Next iqomah will be at: ", time)
 	return time
 }
 
@@ -304,7 +307,7 @@ func sendAdzanReminder(p, t string, i int) {
 
 	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes..", p, t, i)
 	log.Println(text)
-	robotgo.MoveMouse(1477, 513)
+	robotgo.MoveMouse(1458, 510)
 	robotgo.Click("left", true)
 	robotgo.PasteStr(text)
 	robotgo.KeyTap("enter")
@@ -313,7 +316,7 @@ func sendAdzanReminder(p, t string, i int) {
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
 	log.Println(text)
-	robotgo.MoveMouse(1477, 513)
+	robotgo.MoveMouse(1458, 510)
 	robotgo.Click("left", true)
 	robotgo.PasteStr(text)
 	robotgo.KeyTap("enter")
@@ -321,7 +324,7 @@ func sendIqomahReminder() {
 
 func sendGeneralNotification(t string) {
 	log.Println(t)
-	robotgo.MoveMouse(1477, 513)
+	robotgo.MoveMouse(1458, 510)
 	robotgo.Click("left", true)
 	robotgo.PasteStr(t)
 	robotgo.KeyTap("enter")
