@@ -292,6 +292,7 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 	var hs string
 	var ms string
 	var ss string
+
 	if h < 10 {
 		hs = fmt.Sprintf("0%d", h)
 	} else {
