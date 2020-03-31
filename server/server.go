@@ -12,6 +12,7 @@ import (
 	"github.com/Robihamanto/csie-bot/service/praytime"
 	"github.com/Robihamanto/csie-bot/utils/csv"
 	"github.com/beevik/ntp"
+	"github.com/go-vgo/robotgo"
 )
 
 // Start serving time for pray reminder
@@ -40,7 +41,7 @@ func Start(s int) {
 	var ms string
 	var ss string
 	mth := 10
-	mtm := 22
+	mtm := 36
 
 	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
 	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
@@ -65,7 +66,7 @@ func Start(s int) {
 
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
-	// p = pMock
+	p = pMock
 
 	today := fmt.Sprintf("🕌 Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
 	sendGeneralNotification(today)
@@ -362,8 +363,8 @@ func sendGeneralNotification(t string) {
 }
 
 func doRobotJob(t string) {
-	// robotgo.MoveMouse(1458, 510)
-	// robotgo.Click("left", true)
-	// robotgo.PasteStr(t)
-	// robotgo.KeyTap("enter")
+	robotgo.MoveMouse(1458, 510)
+	robotgo.Click("left", true)
+	robotgo.PasteStr(t)
+	robotgo.KeyTap("enter")
 }
