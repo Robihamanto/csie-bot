@@ -38,8 +38,9 @@ func Start(s int) {
 	var now string
 	var hs string
 	var ms string
-	mth := 13
-	mtm := 56
+	var ss string
+	mth := 16
+	mtm := 13
 
 	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
 	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
@@ -104,17 +105,25 @@ func Start(s int) {
 			ms = fmt.Sprintf("%d", m)
 		}
 
+		if s < 10 {
+			ss = fmt.Sprintf("0%d", s)
+		} else {
+			ss = fmt.Sprintf("%d", s)
+		}
+
 		now = fmt.Sprintf("%s:%s", hs, ms)
-		log.Println(now)
+		schedule := fmt.Sprintf("Today's pray time %s Fajr: %s Dhuhr: %s Asr: %s Maghrib: %s Isya: %s", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+		log.Println(schedule)
+		log.Printf("now:%s:%s state:%d", now, ss, state)
 
 		if h == 1 {
-			time.Sleep(10 * time.Minute)
+			time.Sleep(20 * time.Minute)
 			body = fetchMuslimProTime()
 			p = createPrayTime(body)
 			state = 1
 
-			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
-			sendGeneralNotification(today)
+			// today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+			// sendGeneralNotification(today)
 		}
 
 		// Check fajr time from Praytime
