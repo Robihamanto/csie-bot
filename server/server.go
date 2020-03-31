@@ -10,8 +10,8 @@ import (
 
 	"github.com/Robihamanto/csie-bot/model"
 	"github.com/Robihamanto/csie-bot/service/praytime"
+	"github.com/Robihamanto/csie-bot/utils/csv"
 	"github.com/beevik/ntp"
-	"github.com/go-vgo/robotgo"
 )
 
 // Start serving time for pray reminder
@@ -39,8 +39,8 @@ func Start(s int) {
 	var hs string
 	var ms string
 	var ss string
-	mth := 16
-	mtm := 13
+	mth := 10
+	mtm := 22
 
 	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
 	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
@@ -112,9 +112,9 @@ func Start(s int) {
 		}
 
 		now = fmt.Sprintf("%s:%s", hs, ms)
-		schedule := fmt.Sprintf("Today's pray time %s Fajr: %s Dhuhr: %s Asr: %s Maghrib: %s Isya: %s", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
-		log.Println(schedule)
-		log.Printf("now:%s:%s state:%d", now, ss, state)
+		log.Printf("%s:%s", now, ss)
+
+		logs := fmt.Sprintf("now:%s:%s state:%d", now, ss, state)
 
 		if h == 1 {
 			time.Sleep(20 * time.Minute)
@@ -126,12 +126,33 @@ func Start(s int) {
 			// sendGeneralNotification(today)
 		}
 
+		if state == 1 || state == 2 {
+			log.Println("Fajr: ", now, " ", p.Fajr, " : ", now == p.Fajr)
+		}
+
+		if state == 3 || state == 4 {
+			log.Println("Dhuhr: ", now, " ", p.Dhuhr, " : ", now == p.Dhuhr)
+		}
+
+		if state == 5 || state == 6 {
+			log.Println("Asr: ", now, " ", p.Asr, " : ", now == p.Asr)
+		}
+
+		if state == 7 || state == 8 {
+			log.Println("Maghrib: ", now, " ", p.Maghrib, " : ", now == p.Maghrib)
+		}
+
+		if state == 9 || state == 10 {
+			log.Println("Isha'a: ", now, " ", p.Ishaa, " : ", now == p.Ishaa)
+		}
+
 		// Check fajr time from Praytime
 		if now == p.Fajr && state == 1 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 30)
 			sendAdzanReminder("Fajr", p.Fajr, 30)
 			log.Println("Fajr Adzan")
+			csv.Write(logs, "Fajr Adzan", p.Date)
 		}
 
 		// Check dhuhr time from Praytime
@@ -140,6 +161,7 @@ func Start(s int) {
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
 			sendAdzanReminder("Dhuhr", p.Dhuhr, 15)
 			log.Println("Dhuhr Adzan")
+			csv.Write(logs, "Dhuhr Adzan", p.Date)
 		}
 
 		// Check asr time from Asr
@@ -148,6 +170,7 @@ func Start(s int) {
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
 			sendAdzanReminder("Asr", p.Asr, 15)
 			log.Println("Asr Adzan")
+			csv.Write(logs, "Asr Adzan", p.Date)
 		}
 
 		// Check magrib time from Praytime
@@ -156,6 +179,7 @@ func Start(s int) {
 			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
 			sendAdzanReminder("Maghrib", p.Maghrib, 20)
 			log.Println("Maghrib Adzan")
+			csv.Write(logs, "Maghrib Adzan", p.Date)
 		}
 
 		// Check ishaa time from Praytime
@@ -164,33 +188,41 @@ func Start(s int) {
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
 			sendAdzanReminder("Isha'a", p.Ishaa, 15)
 			log.Println("Isha'a Adzan")
+			csv.Write(logs, "Isha'a Adzan", p.Date)
 		}
 
 		if now == iqomahTime && state == 2 {
 			state = state + 1
 			sendIqomahReminder()
+			csv.Write(logs, "Fajr Iqomah", p.Date)
 		}
 
 		if now == iqomahTime && state == 4 {
 			state = state + 1
 			sendIqomahReminder()
+			csv.Write(logs, "Dhuhr Iqomah", p.Date)
 		}
 
 		if now == iqomahTime && state == 6 {
 			state = state + 1
 			sendIqomahReminder()
+			csv.Write(logs, "Asr Iqomah", p.Date)
 		}
 
 		if now == iqomahTime && state == 8 {
 			state = state + 1
 			sendIqomahReminder()
+			csv.Write(logs, "Maghrib Iqomah", p.Date)
 		}
 
 		if now == iqomahTime && state == 10 {
 			state = 1
 			sendIqomahReminder()
+			csv.Write(logs, "Isha'a Iqomah", p.Date)
 		}
-
+		schedule := fmt.Sprintf("Today's pray time %s Fajr: %s Dhuhr: %s Asr: %s Maghrib: %s Isya: %s", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+		// log.Println(schedule)
+		csv.Write(logs, schedule, p.Date)
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -286,7 +318,7 @@ func syncClock() (int, int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + (i * 60) // CHANGE TO I
+	t = t + 3 //(i * 60) // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
@@ -313,28 +345,25 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 }
 
 func sendAdzanReminder(p, t string, i int) {
-
 	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes..", p, t, i)
 	log.Println(text)
-	robotgo.MoveMouse(1458, 510)
-	robotgo.Click("left", true)
-	robotgo.PasteStr(text)
-	robotgo.KeyTap("enter")
+	doRobotJob(text)
 }
 
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
 	log.Println(text)
-	robotgo.MoveMouse(1458, 510)
-	robotgo.Click("left", true)
-	robotgo.PasteStr(text)
-	robotgo.KeyTap("enter")
+	doRobotJob(text)
 }
 
 func sendGeneralNotification(t string) {
 	log.Println(t)
-	robotgo.MoveMouse(1458, 510)
-	robotgo.Click("left", true)
-	robotgo.PasteStr(t)
-	robotgo.KeyTap("enter")
+	doRobotJob(t)
+}
+
+func doRobotJob(t string) {
+	// robotgo.MoveMouse(1458, 510)
+	// robotgo.Click("left", true)
+	// robotgo.PasteStr(t)
+	// robotgo.KeyTap("enter")
 }

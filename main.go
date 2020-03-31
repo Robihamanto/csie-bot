@@ -12,7 +12,7 @@ func main() {
 	// Uncomment pMock
 	// Change iqomah time
 	log.Println("Starting server..")
-	server.Start(7)
+	server.Start(3)
 	// x, y := robotgo.GetMousePos()
 	// log.Println("X:", x)
 	// log.Println("Y:", y)
