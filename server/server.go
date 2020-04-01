@@ -77,7 +77,7 @@ func Start(s int) {
 			isShouldRecync = false
 			_, _, _, gap := syncClock()
 			log.Println("Gap: ", gap)
-			csv.Write("Gap:", gap, p.Date)
+			csv.Write("Gap:", string(gap), p.Date)
 		}
 
 		// 2. Check is time hour == 00:01 - 01:00
@@ -133,6 +133,7 @@ func Start(s int) {
 			state = 0
 			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
 			csv.Write(logs, "Today's Pray Notifications", p.Date)
+			csv.Write(logs, today, p.Date)
 		}
 
 		if state == 1 || state == 2 {
