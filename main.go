@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/Robihamanto/csie-bot/server"
-	"github.com/go-vgo/robotgo"
+	// "github.com/go-vgo/robotgo"
 )
 
 func main() {
@@ -13,8 +13,8 @@ func main() {
 	// Uncomment pMock
 	// Change iqomah time
 	log.Println("Starting server..")
-	server.Start(1)
-	x, y := robotgo.GetMousePos()
-	log.Println("X:", x)
-	log.Println("Y:", y)
+	server.Start(9)
+	// x, y := robotgo.GetMousePos()
+	// log.Println("X:", x)
+	// log.Println("Y:", y)
 }

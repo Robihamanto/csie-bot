@@ -21,10 +21,10 @@ func Start(s int) {
 	// x, y := robotgo.GetMousePos()
 	// Do clock sync with website
 	_, _, _, gap := syncClock()
+	log.Println("Gap: ", gap)
 	// log.Println("Hour gap: ", hGap)
 	// log.Println("Minute gap: ", mGap)
 	// log.Println("Second gap: ", sGap)
-	log.Println("Gap: ", gap)
 
 	// State desc
 	// 1 : Fajr adzan		2 : Fajr iqomah
@@ -35,13 +35,14 @@ func Start(s int) {
 
 	state := s
 	var iqomahTime string
+	var isShouldRecync bool
 
 	var now string
 	var hs string
 	var ms string
 	var ss string
-	mth := 10
-	mtm := 36
+	mth := 11
+	mtm := 25
 
 	fajrm := fmt.Sprintf("%d:%d", mth, mtm)
 	sunrm := fmt.Sprintf("%d:%d", mth, mtm)
@@ -53,7 +54,7 @@ func Start(s int) {
 	pMock := model.Praytime{
 		Month:    "March",
 		Day:      "29",
-		Date:     "29 march",
+		Date:     "31 march",
 		Fajr:     fajrm,
 		Sunshine: sunrm,
 		Dhuhr:    dhuhrm,
@@ -66,12 +67,19 @@ func Start(s int) {
 
 	body := fetchMuslimProTime()
 	p := createPrayTime(body)
-	p = pMock
+	// p = pMock
 
 	today := fmt.Sprintf("🕌 Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
 	sendGeneralNotification(today)
 
 	for {
+		if isShouldRecync {
+			isShouldRecync = false
+			_, _, _, gap := syncClock()
+			log.Println("Gap: ", gap)
+			csv.Write("Gap:", gap, p.Date)
+		}
+
 		// 2. Check is time hour == 00:01 - 01:00
 		// Update today's pray time
 		// Reset sent pray time and iqomah status
@@ -118,13 +126,13 @@ func Start(s int) {
 		logs := fmt.Sprintf("now:%s:%s state:%d", now, ss, state)
 
 		if h == 1 {
+			isShouldRecync = true
 			time.Sleep(20 * time.Minute)
 			body = fetchMuslimProTime()
 			p = createPrayTime(body)
-			state = 1
-
-			// today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
-			// sendGeneralNotification(today)
+			state = 0
+			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+			csv.Write(logs, "Today's Pray Notifications", p.Date)
 		}
 
 		if state == 1 || state == 2 {
@@ -145,6 +153,14 @@ func Start(s int) {
 
 		if state == 9 || state == 10 {
 			log.Println("Isha'a: ", now, " ", p.Ishaa, " : ", now == p.Ishaa)
+		}
+
+		// Check fajr time from Praytime
+		if now == "03:00" && state == 0 {
+			state = state + 1
+			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
+			sendGeneralNotification(today)
+			csv.Write(logs, "Today's Pray Notifications", p.Date)
 		}
 
 		// Check fajr time from Praytime
@@ -177,8 +193,8 @@ func Start(s int) {
 		// Check magrib time from Praytime
 		if now == p.Maghrib && state == 7 {
 			state = state + 1
-			iqomahTime = iqomahTimeBuilder(h, m, s, 20)
-			sendAdzanReminder("Maghrib", p.Maghrib, 20)
+			iqomahTime = iqomahTimeBuilder(h, m, s, 10)
+			sendAdzanReminder("Maghrib", p.Maghrib, 10)
 			log.Println("Maghrib Adzan")
 			csv.Write(logs, "Maghrib Adzan", p.Date)
 		}
@@ -186,8 +202,8 @@ func Start(s int) {
 		// Check ishaa time from Praytime
 		if now == p.Ishaa && state == 9 {
 			state = state + 1
-			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Isha'a", p.Ishaa, 15)
+			iqomahTime = iqomahTimeBuilder(h, m, s, 10)
+			sendAdzanReminder("Isha'a", p.Ishaa, 10)
 			log.Println("Isha'a Adzan")
 			csv.Write(logs, "Isha'a Adzan", p.Date)
 		}
@@ -217,7 +233,7 @@ func Start(s int) {
 		}
 
 		if now == iqomahTime && state == 10 {
-			state = 1
+			state = 0
 			sendIqomahReminder()
 			csv.Write(logs, "Isha'a Iqomah", p.Date)
 		}
@@ -229,7 +245,7 @@ func Start(s int) {
 }
 
 func fetchMuslimProTime() string {
-	resp, err := http.Get("http://www.muslimpro.com/muslimprowidget.js?cityid=1668355&timeformat=24&convention=EgyptBis")
+	resp, err := http.Get("https://www.muslimpro.com/muslimprowidget.js?cityid=6696918&timeformat=24&convention=EgyptBis")
 	checkErr(err)
 	defer resp.Body.Close()
 
@@ -308,7 +324,7 @@ func syncClock() (int, int, int, int) {
 	// 14:06:05 world
 	// 14:05:50 local
 
-	gap := ((ha * 3600) - (h * 3600)) + ((ma * 60) - (m * 60)) + (sa - s) - 1
+	gap := ((ha * 3600) - (h * 3600)) + ((ma * 60) - (m * 60)) + (sa - s)
 
 	h = gap / 3600
 	m = (gap % 3600) / 60
@@ -319,7 +335,7 @@ func syncClock() (int, int, int, int) {
 
 func iqomahTimeBuilder(h, m, s, i int) string {
 	t := (h * 3600) + (m * 60) + s
-	t = t + 3 //(i * 60) // CHANGE TO I
+	t = t + (i * 60) // CHANGE TO I
 	h = t / 3600
 	m = (t % 3600) / 60
 	s = t % 60
@@ -363,7 +379,7 @@ func sendGeneralNotification(t string) {
 }
 
 func doRobotJob(t string) {
-	robotgo.MoveMouse(1458, 510)
+	robotgo.MoveMouse(1575, 563)
 	robotgo.Click("left", true)
 	robotgo.PasteStr(t)
 	robotgo.KeyTap("enter")
