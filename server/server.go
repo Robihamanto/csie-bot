@@ -168,7 +168,7 @@ func Start(s int) {
 		if now == p.Fajr && state == 1 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 30)
-			sendAdzanReminder("Fajr", p.Fajr, 30)
+			sendAdzanReminder("Fajr", p.Fajr, iqomahTime, 30)
 			log.Println("Fajr Adzan")
 			csv.Write(logs, "Fajr Adzan", p.Date)
 		}
@@ -177,7 +177,7 @@ func Start(s int) {
 		if now == p.Dhuhr && state == 3 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Dhuhr", p.Dhuhr, 15)
+			sendAdzanReminder("Dhuhr", p.Dhuhr, iqomahTime, 15)
 			log.Println("Dhuhr Adzan")
 			csv.Write(logs, "Dhuhr Adzan", p.Date)
 		}
@@ -186,7 +186,7 @@ func Start(s int) {
 		if now == p.Asr && state == 5 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 15)
-			sendAdzanReminder("Asr", p.Asr, 15)
+			sendAdzanReminder("Asr", p.Asr, iqomahTime, 15)
 			log.Println("Asr Adzan")
 			csv.Write(logs, "Asr Adzan", p.Date)
 		}
@@ -195,7 +195,7 @@ func Start(s int) {
 		if now == p.Maghrib && state == 7 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 10)
-			sendAdzanReminder("Maghrib", p.Maghrib, 10)
+			sendAdzanReminder("Maghrib", p.Maghrib, iqomahTime, 10)
 			log.Println("Maghrib Adzan")
 			csv.Write(logs, "Maghrib Adzan", p.Date)
 		}
@@ -204,7 +204,7 @@ func Start(s int) {
 		if now == p.Ishaa && state == 9 {
 			state = state + 1
 			iqomahTime = iqomahTimeBuilder(h, m, s, 10)
-			sendAdzanReminder("Isha'a", p.Ishaa, 10)
+			sendAdzanReminder("Isha'a", p.Ishaa, iqomahTime, 10)
 			log.Println("Isha'a Adzan")
 			csv.Write(logs, "Isha'a Adzan", p.Date)
 		}
@@ -358,12 +358,38 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 	}
 
 	time = fmt.Sprintf("%s:%s", hs, ms)
-	// log.Println("Next iqomah will be at: ", time)
 	return time
 }
 
-func sendAdzanReminder(p, t string, i int) {
-	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes..", p, t, i)
+func adzanTimeReminderBuilder(h, m, s, i int) string {
+	t := (h * 3600) + (m * 60) + s
+	t = t - (i * 60)
+	h = t / 3600
+	m = (t % 3600) / 60
+	s = t % 60
+
+	var time string
+	var hs string
+	var ms string
+
+	if h < 10 {
+		hs = fmt.Sprintf("0%d", h)
+	} else {
+		hs = fmt.Sprintf("%d", h)
+	}
+
+	if m < 10 {
+		ms = fmt.Sprintf("0%d", m)
+	} else {
+		ms = fmt.Sprintf("%d", m)
+	}
+
+	time = fmt.Sprintf("%s:%s", hs, ms)
+	return time
+}
+
+func sendAdzanReminder(p, t, q string, i int) {
+	text := fmt.Sprintf("🕌 %s time for Zhongli District : %s\n Iqomah will be held in %d minutes (%s)", p, t, i, q)
 	log.Println(text)
 	doRobotJob(text)
 }
@@ -380,7 +406,7 @@ func sendGeneralNotification(t string) {
 }
 
 func doRobotJob(t string) {
-	robotgo.MoveMouse(1575, 563)
+	robotgo.MoveMouse(1525, 543)
 	robotgo.Click("left", true)
 	robotgo.PasteStr(t)
 	robotgo.KeyTap("enter")
