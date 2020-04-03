@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 )
 
 // Start serving time for pray reminder
-func Start(s int) {
+func Start(s, rs int) {
 	// Find mouse position for send message field
 	// x, y := robotgo.GetMousePos()
 	// Do clock sync with website
@@ -34,7 +35,9 @@ func Start(s int) {
 	// 9 : Isha'a adzan		10 : Isha'a iqomah
 
 	state := s
+	reminderState := rs
 	var iqomahTime string
+	var reminderTime string
 	var isShouldRecync bool
 
 	var now string
@@ -125,7 +128,7 @@ func Start(s int) {
 
 		logs := fmt.Sprintf("now:%s:%s state:%d", now, ss, state)
 
-		if h == 1 {
+		if h == 2 {
 			isShouldRecync = true
 			time.Sleep(20 * time.Minute)
 			body = fetchMuslimProTime()
@@ -137,23 +140,28 @@ func Start(s int) {
 		}
 
 		if state == 1 || state == 2 {
-			log.Println("Fajr: ", now, " ", p.Fajr, " : ", now == p.Fajr)
+			reminderTime = adzanTimeReminderBuilder(p.Fajr)
+			log.Println("Fajr: ", now, " ", reminderTime, " : ", p.Fajr, " : ", now == p.Fajr)
 		}
 
 		if state == 3 || state == 4 {
-			log.Println("Dhuhr: ", now, " ", p.Dhuhr, " : ", now == p.Dhuhr)
+			reminderTime = adzanTimeReminderBuilder(p.Dhuhr)
+			log.Println("Dhuhr: ", now, " ", reminderTime, " : ", p.Dhuhr, " : ", now == p.Dhuhr)
 		}
 
 		if state == 5 || state == 6 {
-			log.Println("Asr: ", now, " ", p.Asr, " : ", now == p.Asr)
+			reminderTime = adzanTimeReminderBuilder(p.Asr)
+			log.Println("Asr: ", now, " ", reminderTime, " : ", p.Asr, " : ", now == p.Asr)
 		}
 
 		if state == 7 || state == 8 {
-			log.Println("Maghrib: ", now, " ", p.Maghrib, " : ", now == p.Maghrib)
+			reminderTime = adzanTimeReminderBuilder(p.Maghrib)
+			log.Println("Maghrib: ", now, " ", reminderTime, " : ", p.Maghrib, " : ", now == p.Maghrib)
 		}
 
 		if state == 9 || state == 10 {
-			log.Println("Isha'a: ", now, " ", p.Ishaa, " : ", now == p.Ishaa)
+			reminderTime = adzanTimeReminderBuilder(p.Ishaa)
+			log.Println("Isha'a: ", now, " ", reminderTime, " : ", p.Ishaa, " : ", now == p.Ishaa)
 		}
 
 		// Check fajr time from Praytime
@@ -238,6 +246,37 @@ func Start(s int) {
 			sendIqomahReminder()
 			csv.Write(logs, "Isha'a Iqomah", p.Date)
 		}
+
+		if now == reminderTime && reminderState == 1 {
+			reminderState = reminderState + 1
+			sendAdzanTimeReminder("Fajr", p.Fajr)
+			csv.Write(logs, "Fajr Adzan Reminder", p.Date)
+		}
+
+		if now == reminderTime && reminderState == 2 {
+			reminderState = reminderState + 1
+			sendAdzanTimeReminder("Dhuhr", p.Dhuhr)
+			csv.Write(logs, "Dhuhr Adzan Reminder", p.Date)
+		}
+
+		if now == reminderTime && reminderState == 3 {
+			reminderState = reminderState + 1
+			sendAdzanTimeReminder("Asr", p.Asr)
+			csv.Write(logs, "Asr Adzan Reminder", p.Date)
+		}
+
+		if now == reminderTime && reminderState == 4 {
+			reminderState = reminderState + 1
+			sendAdzanTimeReminder("Maghrib", p.Maghrib)
+			csv.Write(logs, "Maghrib Adzan Reminder", p.Date)
+		}
+
+		if now == reminderTime && reminderState == 5 {
+			reminderState = 1
+			sendAdzanTimeReminder("Isha'a", p.Ishaa)
+			csv.Write(logs, "Isha'a Adzan Reminder", p.Date)
+		}
+
 		schedule := fmt.Sprintf("Today's pray time %s Fajr: %s Dhuhr: %s Asr: %s Maghrib: %s Isya: %s", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
 		// log.Println(schedule)
 		csv.Write(logs, schedule, p.Date)
@@ -361,14 +400,16 @@ func iqomahTimeBuilder(h, m, s, i int) string {
 	return time
 }
 
-func adzanTimeReminderBuilder(h, m, s, i int) string {
-	t := (h * 3600) + (m * 60) + s
-	t = t - (i * 60)
+func adzanTimeReminderBuilder(time string) string {
+	h, _ := strconv.Atoi(time[0:2])
+	m, _ := strconv.Atoi(time[3:5])
+
+	t := (h * 3600) + (m * 60)
+	t = t - (10 * 60)
 	h = t / 3600
 	m = (t % 3600) / 60
-	s = t % 60
 
-	var time string
+	var timeResult string
 	var hs string
 	var ms string
 
@@ -384,8 +425,8 @@ func adzanTimeReminderBuilder(h, m, s, i int) string {
 		ms = fmt.Sprintf("%d", m)
 	}
 
-	time = fmt.Sprintf("%s:%s", hs, ms)
-	return time
+	timeResult = fmt.Sprintf("%s:%s", hs, ms)
+	return timeResult
 }
 
 func sendAdzanReminder(p, t, q string, i int) {
@@ -396,6 +437,12 @@ func sendAdzanReminder(p, t, q string, i int) {
 
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
+	log.Println(text)
+	doRobotJob(text)
+}
+
+func sendAdzanTimeReminder(p, t string) {
+	text := fmt.Sprintf("🕌 Reminder: 10 minutes before %s Adzan for Zhongli District : %s", p, t)
 	log.Println(text)
 	doRobotJob(text)
 }

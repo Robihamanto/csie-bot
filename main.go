@@ -14,7 +14,7 @@ func main() {
 	// Change iqomah time
 	robotgo.ShowAlert("Turn on the server", "Have you complete all setup? State? Mock? Iqomah time?")
 	log.Println("Starting server..")
-	server.Start(3)
+	server.Start(3, 2)
 	// x, y := robotgo.GetMousePos()
 	// log.Println("X:", x)
 	// log.Println("Y:", y)
