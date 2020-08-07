@@ -1,13 +1,18 @@
 # csie-bot
 Create bot for sending an automated message via any chat vendor
 
-Pray time source : https://www.muslimpro.com/en/prayer-times (updated everyday at 00:01 AM)
+- Pray time source: https://www.muslimpro.com/en/prayer-times (updated everyday at 00:01 AM)
+- GCC: https://sourceforge.net/projects/mingw-w64/
+- GCC Installation: https://www.ics.uci.edu/~pattis/common/handouts/mingweclipse/mingw.html
+
 
 ## Installation
  
 GCC Should installed on your windows
 just run go run `main.go` on root folder
 and you ready to go! 🥰
+
+`go run main.go`
  
 ## Contributing
  
