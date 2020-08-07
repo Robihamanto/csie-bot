@@ -95,7 +95,7 @@ func Start(s int) {
 
 		// adjust system time with gap time, if result (-) means tertinggal (+ means lead)
 		if gap < 0 {
-			ts = ts - gap
+			ts = ts + gap
 		} else {
 			ts = ts + gap
 		}
@@ -471,6 +471,7 @@ func sendAdzanReminder(p, t, q string, i int) {
 func sendIqomahReminder() {
 	text := fmt.Sprintf("Iqomah 🎉")
 	log.Println(text)
+
 	doRobotJob(text)
 }
 
@@ -486,10 +487,17 @@ func sendGeneralNotification(t string) {
 }
 
 func doRobotJob(t string) {
-	log.Println("Doing robot job :) ", t)
-	csv.Write(t, "", "05 Apr")
-	robotgo.MoveMouse(1515, 493)
+	log.Println("Doing robot job for Engineering  5:) ", t)
+	sendMessage(1594, 413, t)
+
+	log.Println("Doing robot job for Engineering  LS:) ", t)
+	sendMessage(1600, 738, t)
+}
+
+func sendMessage(x int, y int, m string) {
+	csv.Write(m, "", "05 Apr")
+	robotgo.MoveMouse(x, y)
 	robotgo.Click("left", true)
-	robotgo.PasteStr(t)
+	robotgo.PasteStr(m)
 	robotgo.KeyTap("enter")
 }
