@@ -2,7 +2,8 @@
 Create bot for sending an automated message via any chat vendor
 
 - Pray time source: https://www.muslimpro.com/en/prayer-times (updated everyday at 00:01 AM)
-- GCC Installation: https://www.ics.uci.edu/~pattis/common/handouts/mingweclipse/mingw.html
+- GCC 64 Bit: http://mingw-w64.org/doku.php/download/mingw-builds
+- GCC Installation: https://github.com/golang/go/issues/29679
 
 
 ## Installation
