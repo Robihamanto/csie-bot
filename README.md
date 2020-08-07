@@ -1,9 +1,10 @@
 # csie-bot
-Create bot for sending an automated message via any chat vendor
+Create bot for sending an automated message via any chat vendor (WINDOWS SERVER NEEDED)
 
 - Pray time source: https://www.muslimpro.com/en/prayer-times (updated everyday at 00:01 AM)
 - GCC 64 Bit: http://mingw-w64.org/doku.php/download/mingw-builds
-- GCC Installation: https://github.com/golang/go/issues/29679
+- GCC Installation 1: https://github.com/golang/go/issues/29679 (Please see the image on the bottom page for 64bit installation)
+- GCC Installation 2: Add this `C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin` to env variable
 
 
 ## Installation
@@ -12,6 +13,7 @@ GCC Should installed on your windows
 just run go run `main.go` on root folder
 and you ready to go! 🥰
 
+## Run Code
 `go run main.go`
  
 ## Contributing
@@ -25,6 +27,7 @@ and you ready to go! 🥰
 ## History
  
 Version 0.1 (2020-03-30) - adding Pray time and Iqomah reminder (Beta)
+Version 0.2 (2020-08-07) - finished all feature (Beta)
  
 ## License
  
