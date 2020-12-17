@@ -33,3 +33,19 @@ func getNumberOnly(s string) string {
 	result := reg.ReplaceAllString(s, "")
 	return result
 }
+
+// new get date func to convert from new api's readable format
+func GetDateFromReadable(t string) (string, string) {
+	lt := len(t)
+	month := t[lt-8 : lt-5]
+	day := t[lt-11 : lt-9]
+	day = getNumberOnly(day)
+
+	// conv to int if pos
+	_, err := strconv.Atoi(day)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return day, month
+}
