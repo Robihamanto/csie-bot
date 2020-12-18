@@ -563,9 +563,11 @@ func sendGeneralNotification(t string) {
 func doRobotJob(t string) {
 	log.Println("Doing robot job for Engineering  5:) ", t)
 	sendMessage(1594, 413, t)
+	csv.Write(t, "", "")
 
 	log.Println("Doing robot job for Engineering  LS:) ", t)
 	sendMessage(1600, 738, t)
+	csv.Write(t, "", "")
 }
 
 func sendMessage(x int, y int, m string) {
