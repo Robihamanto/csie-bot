@@ -68,7 +68,7 @@ func Start(s int) {
 
 	log.Println("Todays praytime: ", pMock)
 
-	body := fetchPrayerTimeFromApi() // changed from fetchMuslimProTime to a new one
+	body := fetchPrayerTimeFromApi()
 	p := createPrayTime(body)
 	// p = pMock
 
@@ -289,22 +289,10 @@ func Start(s int) {
 	}
 }
 
-func fetchMuslimProTime() string {
-	resp, err := http.Get("https://www.muslimpro.com/muslimprowidget.js?cityid=6696918&timeformat=24&convention=EgyptBis")
-	checkErr(err)
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	checkErr(err)
-
-	return string(body)
-}
-
 // Added new API from api.aladhan.com
 // Todo: remove old API from muslimpro widget
 func fetchPrayerTimeFromApi() string {
-
-	// 	method (number)
+	// 	Calculation Method (number)
 	// A prayer times calculation method. Methods identify various schools of thought about how to compute the timings.
 	// This parameter accepts values from 0-12 and 99, as specified below:
 	// 0 - Shia Ithna-Ansari
@@ -323,7 +311,7 @@ func fetchPrayerTimeFromApi() string {
 	// 14 - Spiritual Administration of Muslims of Russia
 	// 99 - Custom. See https://aladhan.com/calculation-methods
 
-	method := 3
+	method := "3" // STRING
 	// day := strconv.Itoa(time.Now().Day())
 	month := time.Now().Month()
 	year := time.Now().Year()
@@ -346,8 +334,6 @@ func fetchPrayerTimeFromApi() string {
 	// return prayer time as strigified json object
 	return "{\"time\":" + prayerTimes.String() + ",\"date\":" + date.String() + "}"
 }
-
-// func createPrayTime(source string) model.Praytime {
 
 // 	date := findString(source, "<div class=\"daterow\">", "</div></td>")
 // 	fajr := findPraytimeString(source, "<td>Fajr</td><td>")
@@ -562,11 +548,11 @@ func sendGeneralNotification(t string) {
 
 func doRobotJob(t string) {
 	log.Println("Doing robot job for Engineering  5:) ", t)
-	sendMessage(1594, 413, t)
+	// sendMessage(1594, 413, t)
 	csv.Write(t, "", "")
 
 	log.Println("Doing robot job for Engineering  LS:) ", t)
-	sendMessage(1600, 738, t)
+	// sendMessage(1600, 738, t)
 	csv.Write(t, "", "")
 }
 
