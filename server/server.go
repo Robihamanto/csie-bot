@@ -14,6 +14,7 @@ import (
 	"github.com/Robihamanto/csie-bot/utils/csv"
 	"github.com/beevik/ntp"
 	"github.com/go-vgo/robotgo"
+	"github.com/tidwall/gjson"
 )
 
 // Start serving time for pray reminder
@@ -67,7 +68,7 @@ func Start(s int) {
 
 	log.Println("Todays praytime: ", pMock)
 
-	body := fetchMuslimProTime()
+	body := fetchPrayerTimeFromApi()
 	p := createPrayTime(body)
 	// p = pMock
 
@@ -130,7 +131,7 @@ func Start(s int) {
 		if h == 2 {
 			isShouldRecync = true
 			time.Sleep(20 * time.Minute)
-			body = fetchMuslimProTime()
+			body = fetchPrayerTimeFromApi() //changed from muslim pro
 			p = createPrayTime(body)
 			state = 0
 			today := fmt.Sprintf("Today's pray time %s\nFajr: %s\nDhuhr: %s\nAsr: %s\nMaghrib: %s\nIsya: %s\n", p.Date, p.Fajr, p.Dhuhr, p.Asr, p.Maghrib, p.Ishaa)
@@ -288,27 +289,86 @@ func Start(s int) {
 	}
 }
 
-func fetchMuslimProTime() string {
-	resp, err := http.Get("https://www.muslimpro.com/muslimprowidget.js?cityid=6696918&timeformat=24&convention=EgyptBis")
+// Added new API from api.aladhan.com
+// Todo: remove old API from muslimpro widget
+func fetchPrayerTimeFromApi() string {
+	// 	Calculation Method (number)
+	// A prayer times calculation method. Methods identify various schools of thought about how to compute the timings.
+	// This parameter accepts values from 0-12 and 99, as specified below:
+	// 0 - Shia Ithna-Ansari
+	// 1 - University of Islamic Sciences, Karachi
+	// 2 - Islamic Society of North America
+	// 3 - Muslim World League
+	// 4 - Umm Al-Qura University, Makkah
+	// 5 - Egyptian General Authority of Survey
+	// 7 - Institute of Geophysics, University of Tehran
+	// 8 - Gulf Region
+	// 9 - Kuwait
+	// 10 - Qatar
+	// 11 - Majlis Ugama Islam Singapura, Singapore
+	// 12 - Union Organization islamic de France
+	// 13 - Diyanet İşleri Başkanlığı, Turkey
+	// 14 - Spiritual Administration of Muslims of Russia
+	// 99 - Custom. See https://aladhan.com/calculation-methods
+
+	method := "3" // STRING
+	// day := strconv.Itoa(time.Now().Day())
+	month := time.Now().Month()
+	year := time.Now().Year()
+
+	dayIndex := strconv.Itoa(time.Now().Day() - 1)
+
+	api := fmt.Sprintf("http://api.aladhan.com/v1/calendarByCity?city=Zhongli&country=Taiwan&method=%s&month=%s&year=%s", method, month, year)
+
+	resp, err := http.Get(api)
 	checkErr(err)
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	checkErr(err)
 
-	return string(body)
+	prayerTimes := gjson.Get(string(body), "data."+string(dayIndex)+".timings")
+
+	date := gjson.Get(string(body), "data."+string(dayIndex)+".date")
+
+	// return prayer time as strigified json object
+	return "{\"time\":" + prayerTimes.String() + ",\"date\":" + date.String() + "}"
 }
 
+// 	date := findString(source, "<div class=\"daterow\">", "</div></td>")
+// 	fajr := findPraytimeString(source, "<td>Fajr</td><td>")
+// 	sunshine := findPraytimeString(source, "<td>Sunrise</td><td>")
+// 	dhuhr := findPraytimeString(source, "<td>Dhuhr</td><td>")
+// 	asr := findPraytimeString(source, "<td>Asr</td><td>")
+// 	maghrib := findPraytimeString(source, "<td>Maghrib</td><td>")
+// 	ishaa := findPraytimeString(source, "<td>Isha&#39;a</td><td>")
+// 	day, month := praytime.GetDate(date)
+
+// 	p := model.Praytime{
+// 		Month:    month,
+// 		Day:      day,
+// 		Date:     date,
+// 		Fajr:     fajr,
+// 		Sunshine: sunshine,
+// 		Dhuhr:    dhuhr,
+// 		Asr:      asr,
+// 		Maghrib:  maghrib,
+// 		Ishaa:    ishaa,
+// 	}
+// 	return p
+// }
+
+// new funcion to construct praytime model from json object
 func createPrayTime(source string) model.Praytime {
 
-	date := findString(source, "<div class=\"daterow\">", "</div></td>")
-	fajr := findPraytimeString(source, "<td>Fajr</td><td>")
-	sunshine := findPraytimeString(source, "<td>Sunrise</td><td>")
-	dhuhr := findPraytimeString(source, "<td>Dhuhr</td><td>")
-	asr := findPraytimeString(source, "<td>Asr</td><td>")
-	maghrib := findPraytimeString(source, "<td>Maghrib</td><td>")
-	ishaa := findPraytimeString(source, "<td>Isha&#39;a</td><td>")
-	day, month := praytime.GetDate(date)
+	date := gjson.Get(source, "date.readable").String()
+	fajr := gjson.Get(source, "time.Fajr").String()[0:5]
+	sunshine := gjson.Get(source, "time.Sunrise").String()[0:5]
+	dhuhr := gjson.Get(source, "time.Dhuhr").String()[0:5]
+	asr := gjson.Get(source, "time.Asr").String()[0:5]
+	maghrib := gjson.Get(source, "time.Maghrib").String()[0:5]
+	ishaa := gjson.Get(source, "time.Isha").String()[0:5]
+	day, month := praytime.GetDateFromReadable(date)
 
 	p := model.Praytime{
 		Month:    month,
@@ -488,10 +548,12 @@ func sendGeneralNotification(t string) {
 
 func doRobotJob(t string) {
 	log.Println("Doing robot job for Engineering  5:) ", t)
-	sendMessage(1594, 413, t)
+	// sendMessage(1594, 413, t)
+	csv.Write(t, "", "")
 
 	log.Println("Doing robot job for Engineering  LS:) ", t)
-	sendMessage(1600, 738, t)
+	// sendMessage(1600, 738, t)
+	csv.Write(t, "", "")
 }
 
 func sendMessage(x int, y int, m string) {
